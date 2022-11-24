@@ -44,6 +44,7 @@ async function run() {
         const categoryCollection = client.db('recycleTech').collection('categories');
         const productCollection = client.db('recycleTech').collection('products');
         const usersCollection = client.db('recycleTech').collection('users');
+        const bookingCollection = client.db('recycleTech').collection('bookings');
 
 
         app.get('/categories', async (req, res) => {
@@ -84,6 +85,42 @@ async function run() {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result);
+        });
+
+
+
+
+
+        app.get('/bookings', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            const query = { email: email };
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
+
+        });
+
+        app.get('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const booking = await bookingCollection.findOne(query);
+            res.send(booking);
+        })
+
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            console.log(booking);
+            const query = {
+
+                email: booking.email,
+
+            }
+
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result)
         });
 
 
