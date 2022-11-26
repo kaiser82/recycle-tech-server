@@ -74,6 +74,31 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/products', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            const query = { email: email };
+            const products = await productCollection.find(query).toArray();
+            res.send(products);
+
+        });
+
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        });
+
+        app.delete('/products/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(filter);
+            res.send(result);
+        });
+
 
         app.get('/jwt', async (req, res) => {
             const email = req.query.email;
@@ -113,6 +138,7 @@ async function run() {
             const result = await usersCollection.deleteOne(filter);
             res.send(result);
         });
+
         app.delete('/users/sellers/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
