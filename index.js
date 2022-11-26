@@ -114,13 +114,13 @@ async function run() {
 
 
 
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyJWT, async (req, res) => {
             const query = {};
             const users = await usersCollection.find(query).toArray();
             res.send(users);
         });
 
-        app.get('/users/buyers', async (req, res) => {
+        app.get('/users/buyers', verifyJWT, async (req, res) => {
             const query = { role: 'buyer' };
             const buyers = await usersCollection.find(query).toArray();
             res.send(buyers);
@@ -246,8 +246,6 @@ async function run() {
             const updateResult = await bookingCollection.updateOne(filter, updatedDoc)
             res.send(result);
         })
-
-
 
 
     }
