@@ -46,6 +46,8 @@ async function run() {
         const usersCollection = client.db('recycleTech').collection('users');
         const bookingCollection = client.db('recycleTech').collection('bookings');
         const paymentsCollection = client.db('recycleTech').collection('payments');
+        const reportsCollection = client.db('recycleTech').collection('reports');
+        const advertiseCollection = client.db('recycleTech').collection('advertises');
 
 
         const verifyAdmin = async (req, res, next) => {
@@ -120,7 +122,7 @@ async function run() {
             res.send(users);
         });
 
-        app.get('/users/buyers', verifyJWT, async (req, res) => {
+        app.get('/users/buyers', verifyJWT, verifyAdmin, async (req, res) => {
             const query = { role: 'buyer' };
             const buyers = await usersCollection.find(query).toArray();
             res.send(buyers);
@@ -171,14 +173,19 @@ async function run() {
 
 
 
-
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
 
+        app.patch('/users/:email', async (req, res) => {
+            const email = req.params.email;
 
+            const result = await usersCollection.updateOne({ email: email }, { $set: req.body });
+
+            res.send(result);
+        });
 
 
 
@@ -191,7 +198,6 @@ async function run() {
             const query = { email: email };
             const bookings = await bookingCollection.find(query).toArray();
             res.send(bookings);
-
         });
 
         app.get('/bookings/:id', async (req, res) => {
@@ -199,7 +205,7 @@ async function run() {
             const query = { _id: ObjectId(id) }
             const order = await bookingCollection.findOne(query);
             res.send(order);
-        })
+        });
 
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
@@ -207,8 +213,40 @@ async function run() {
             const query = {
                 email: booking.email,
             }
-
             const result = await bookingCollection.insertOne(booking);
+            res.send(result)
+        });
+
+
+
+        app.get('/reports', verifyJWT, async (req, res) => {
+            const query = {};
+            const reports = await reportsCollection.find(query).toArray();
+            res.send(reports);
+        });
+
+        app.post('/reports', async (req, res) => {
+            const report = req.body;
+            const result = await reportsCollection.insertOne(report);
+            res.send(result)
+        });
+
+        app.delete('/reports/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await reportsCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        app.get('/advertises', async (req, res) => {
+            const query = {};
+            const advertises = await advertiseCollection.find(query).toArray();
+            res.send(advertises);
+        });
+
+        app.post('/advertises', async (req, res) => {
+            const advertise = req.body;
+            const result = await advertiseCollection.insertOne(advertise);
             res.send(result)
         });
 
