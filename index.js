@@ -128,13 +128,21 @@ async function run() {
             res.send(users);
         });
 
-        app.get('/users/buyers', verifyJWT, verifyAdmin, async (req, res) => {
+        app.get('/users/buyer', async (req, res) => {
             const query = { role: 'buyer' };
             const buyers = await usersCollection.find(query).toArray();
+            console.log(buyers)
             res.send(buyers);
         });
 
-        app.get('/users/sellers', verifyJWT, verifyAdmin, async (req, res) => {
+        app.get('/buyer', verifyJWT, verifyAdmin, async (req, res) => {
+            const query = { role: 'buyer' };
+            const buyers = await usersCollection.find(query).toArray();
+            console.log(buyers)
+            res.send(buyers);
+        })
+
+        app.get('/sellers', verifyJWT, verifyAdmin, async (req, res) => {
             const query = { role: 'seller' };
             const sellers = await usersCollection.find(query).toArray();
             res.send(sellers);
@@ -305,7 +313,14 @@ async function run() {
             }
             const updateResult = await bookingCollection.updateOne(filter, updatedDoc)
             res.send(result);
-        })
+        });
+
+        app.get('/payments', verifyJWT, async (req, res) => {
+
+            const query = {}
+            const result = await paymentsCollection.find(query).toArray();
+            res.send(result);
+        });
 
 
     }
