@@ -71,7 +71,7 @@ async function run() {
 
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id
-            const query = { category_id: id };
+            const query = { categoryName: id };
             const result = await productCollection.find(query).toArray();
             res.send(result);
         });
@@ -85,7 +85,6 @@ async function run() {
             const query = { email: email };
             const products = await productCollection.find(query).toArray();
             res.send(products);
-
         });
 
         app.post('/products', async (req, res) => {
@@ -268,16 +267,25 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/advertises', async (req, res) => {
-            const query = {};
-            const advertises = await advertiseCollection.find(query).toArray();
-            res.send(advertises);
+        // for advertisement
+
+        app.put('/products/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    advertise: 'yes'
+                }
+            }
+            const result = await productCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
         });
 
-        app.post('/advertises', async (req, res) => {
-            const advertise = req.body;
-            const result = await advertiseCollection.insertOne(advertise);
-            res.send(result)
+        app.get('/advertises', async (req, res) => {
+            const query = { advertise: 'yes' };
+            const advertises = await productCollection.find(query).toArray();
+            res.send(advertises);
         });
 
 
